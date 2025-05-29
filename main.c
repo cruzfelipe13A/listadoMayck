@@ -1,83 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct No {
-    int dado;
-    struct No* prox;
-} No;
+typedef struct Pilha {
+    int* dados;
+    int topo;
+    int capacidade;
+} Pilha;
 
-No* inverter_lista(No* head) {
-    No *prev = NULL, *curr = head, *next = NULL;
-    while (curr) {
-        next = curr->prox;
-        curr->prox = prev;
-        prev = curr;
-        curr = next;
-    }
-    return prev;
+void inicializar(Pilha* p, int cap) {
+    p->dados = malloc(sizeof(int) * cap);
+    p->topo = -1;
+    p->capacidade = cap;
 }
 
-int eh_palindromo(No* head) {
-    if (!head || !head->prox) return 1;
-    No *slow = head, *fast = head, *prev_slow = NULL;
-    while (fast && fast->prox) {
-        fast = fast->prox->prox;
-        prev_slow = slow;
-        slow = slow->prox;
+int esta_vazia(Pilha* p) {
+    return p->topo == -1;
+}
+
+void empilhar(Pilha* p, int val) {
+    if (p->topo < p->capacidade - 1) {
+        p->dados[++(p->topo)] = val;
     }
-    No* segundo_inicio = (fast) ? slow->prox : slow;
-    prev_slow->prox = NULL;
-    segundo_inicio = inverter_lista(segundo_inicio);
-    No* p1 = head;
-    No* p2 = segundo_inicio;
-    int res = 1;
-    while (p2) {
-        if (p1->dado != p2->dado) {
-            res = 0;
-            break;
+}
+
+int desempilhar(Pilha* p) {
+    if (esta_vazia(p)) return -1;
+    return p->dados[(p->topo)--];
+}
+
+int topo(Pilha* p) {
+    if (esta_vazia(p)) return -1;
+    return p->dados[p->topo];
+}
+
+int trap(int* height, int n) {
+    Pilha s;
+    inicializar(&s, n);
+    int i = 0, res = 0;
+    while (i < n) {
+        while (!esta_vazia(&s) && height[i] > height[topo(&s)]) {
+            int top = desempilhar(&s);
+            if (esta_vazia(&s)) break;
+            int dist = i - topo(&s) - 1;
+            int h = (height[i] < height[topo(&s)] ? height[i] : height[topo(&s)]) - height[top];
+            res += dist * h;
         }
-        p1 = p1->prox;
-        p2 = p2->prox;
+        empilhar(&s, i++);
     }
-    segundo_inicio = inverter_lista(segundo_inicio);
-    if (fast) {
-        prev_slow->prox->prox = segundo_inicio;
-    } else {
-        prev_slow->prox = segundo_inicio;
-    }
+    free(s.dados);
     return res;
 }
 
-void inserir_fim(No** l, int v) {
-    No* n = malloc(sizeof(No));
-    n->dado = v;
-    n->prox = NULL;
-    if (*l == NULL) {
-        *l = n;
-    } else {
-        No* a = *l;
-        while (a->prox) a = a->prox;
-        a->prox = n;
-    }
-}
-
-void imprimir(No* l) {
-    while (l) {
-        printf("%d -> ", l->dado);
-        l = l->prox;
-    }
-    printf("NULL\n");
-}
-
 int main() {
-    No* lista = NULL;
-    inserir_fim(&lista, 1);
-    inserir_fim(&lista, 2);
-    inserir_fim(&lista, 3);
-    inserir_fim(&lista, 2);
-    inserir_fim(&lista, 1);
-    printf("%d\n", eh_palindromo(lista));
-    inserir_fim(&lista, 0);
-    printf("%d\n", eh_palindromo(lista));
+    int arr[] = {0,1,0,2,1,0,1,3,2,1,2,1};
+    int n = sizeof(arr)/sizeof(arr[0]);
+    printf("%d\n", trap(arr, n)); // 6
     return 0;
 }
