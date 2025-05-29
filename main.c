@@ -25,13 +25,30 @@ void inserir_fim(No** l, int v) {
     }
 }
 
-int contar_nos(No* l) {
-    int cont = 0;
-    while (l) {
-        cont++;
-        l = l->prox;
+void inserir_posicao(No** l, int v, int pos) {
+    if (pos == 0) {
+        inserir_inicio(l, v);
+        return;
     }
-    return cont;
+    
+    No* atual = *l;
+    for (int i = 0; i < pos - 1; i++) {
+        if (atual == NULL) {
+            printf("Posição inválida\n");
+            return;
+        }
+        atual = atual->prox;
+    }
+    
+    if (atual == NULL) {
+        printf("Posição inválida\n");
+        return;
+    }
+    
+    No* novo = malloc(sizeof(No));
+    novo->val = v;
+    novo->prox = atual->prox;
+    atual->prox = novo;
 }
 
 void imprimir(No* l) {
@@ -48,8 +65,13 @@ int main() {
     inserir_inicio(&l, 5);
     inserir_fim(&l, 20);
 
-    imprimir(l);
-    printf("Total de nós: %d\n", contar_nos(l));
+    imprimir(l);  
+
+    inserir_posicao(&l, 15, 2);  
+    imprimir(l);  
+
+    inserir_posicao(&l, 1, 0);   
+    imprimir(l);  
 
     return 0;
 }
