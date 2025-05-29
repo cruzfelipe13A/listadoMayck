@@ -1,99 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TAM 100
+typedef struct No {
+    int dado;
+    struct No* prox;
+} No;
 
-typedef struct {
-    int fila[TAM];
-    int inicio;
-    int fim;
-    int tamanho;
-} FilaCircular;
-
-void inicializar(FilaCircular* f) {
-    f->inicio = 0;
-    f->fim = 0;
-    f->tamanho = 0;
-}
-
-int fila_vazia(FilaCircular* f) {
-    return f->tamanho == 0;
-}
-
-int fila_cheia(FilaCircular* f) {
-    return f->tamanho == TAM;
-}
-
-int enfileirar(FilaCircular* f, int valor) {
-    if (fila_cheia(f)) return 0;
-    f->fila[f->fim] = valor;
-    f->fim = (f->fim + 1) % TAM;
-    f->tamanho++;
-    return 1;
-}
-
-int desenfileirar(FilaCircular* f, int* valor) {
-    if (fila_vazia(f)) return 0;
-    *valor = f->fila[f->inicio];
-    f->inicio = (f->inicio + 1) % TAM;
-    f->tamanho--;
-    return 1;
-}
-
-void imprimir_fila(FilaCircular* f) {
-    if (fila_vazia(f)) {
-        printf("Fila vazia\n");
-        return;
+int detectar_ciclo(No* inicio) {
+    No *lento = inicio, *rapido = inicio;
+    while (rapido && rapido->prox) {
+        lento = lento->prox;
+        rapido = rapido->prox->prox;
+        if (lento == rapido) {
+            return 1;
+        }
     }
-    int i = f->inicio, count = f->tamanho;
-    while (count--) {
-        printf("%d ", f->fila[i]);
-        i = (i + 1) % TAM;
-    }
-    printf("\n");
+    return 0;
 }
 
-void inverter_primeiros_k(FilaCircular* f, int k) {
-    if (k <= 0 || k > f->tamanho) return;
-
-    int pilha[TAM];
-    int topo = -1;
-    int val;
-
-    // Desenfileirar os primeiros k elementos e empilhar
-    for (int i = 0; i < k; i++) {
-        desenfileirar(f, &val);
-        pilha[++topo] = val;
-    }
-
-    // Enfileirar os elementos da pilha (invertidos)
-    while (topo >= 0) {
-        enfileirar(f, pilha[topo--]);
-    }
-
-    // Enfileirar os elementos restantes para manter ordem
-    int tamanho_restante = f->tamanho - k;
-    for (int i = 0; i < tamanho_restante; i++) {
-        desenfileirar(f, &val);
-        enfileirar(f, val);
-    }
+// Função auxiliar para criar um nó
+No* criar_no(int valor) {
+    No* n = malloc(sizeof(No));
+    n->dado = valor;
+    n->prox = NULL;
+    return n;
 }
 
 int main() {
-    FilaCircular f;
-    inicializar(&f);
+    No* inicio = criar_no(1);
+    inicio->prox = criar_no(2);
+    inicio->prox->prox = criar_no(3);
+    inicio->prox->prox->prox = criar_no(4);
+    inicio->prox->prox->prox->prox = criar_no(5);
 
-    for (int i = 1; i <= 10; i++) {
-        enfileirar(&f, i);
-    }
+    printf("Detectar ciclo (sem ciclo): %d\n", detectar_ciclo(inicio)); // 0
 
-    printf("Fila original:\n");
-    imprimir_fila(&f);
+    // Criar ciclo: apontar o último nó para o segundo nó
+    inicio->prox->prox->prox->prox->prox = inicio->prox;
 
-    inverter_primeiros_k(&f, 5);
+    printf("Detectar ciclo (com ciclo): %d\n", detectar_ciclo(inicio)); // 1
 
-    printf("Fila após inverter os primeiros 5 elementos:\n");
-    imprimir_fila(&f);
+    // Atenção: não liberando memória pois há ciclo na lista.
 
     return 0;
 }
