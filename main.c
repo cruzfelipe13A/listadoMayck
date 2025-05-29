@@ -1,66 +1,62 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-typedef struct No {
-    int dado;
-    struct No* prox;
-} No;
+#define TAM 1000
 
 typedef struct Pilha {
-    No* topo;
+    char dados[TAM];
+    int topo;
 } Pilha;
 
-void inicializar_pilha(Pilha* p) {
-    p->topo = NULL;
+void inicializar(Pilha* p) {
+    p->topo = -1;
 }
 
 int pilha_vazia(Pilha* p) {
-    return p->topo == NULL;
+    return p->topo == -1;
 }
 
-void empilhar(Pilha* p, int valor) {
-    No* novo = malloc(sizeof(No));
-    novo->dado = valor;
-    novo->prox = p->topo;
-    p->topo = novo;
-}
-
-int desempilhar(Pilha* p, int* valor) {
-    if (pilha_vazia(p)) return 0;
-    No* temp = p->topo;
-    *valor = temp->dado;
-    p->topo = temp->prox;
-    free(temp);
+int empilhar(Pilha* p, char c) {
+    if (p->topo >= TAM - 1) return 0;
+    p->dados[++(p->topo)] = c;
     return 1;
 }
 
-void imprimir_pilha(Pilha* p) {
-    No* atual = p->topo;
-    while (atual) {
-        printf("%d -> ", atual->dado);
-        atual = atual->prox;
+char desempilhar(Pilha* p) {
+    if (pilha_vazia(p)) return '\0';
+    return p->dados[(p->topo)--];
+}
+
+char topo(Pilha* p) {
+    if (pilha_vazia(p)) return '\0';
+    return p->dados[p->topo];
+}
+
+int corresponde(char ab, char fe) {
+    return (ab == '(' && fe == ')') || (ab == '{' && fe == '}') || (ab == '[' && fe == ']');
+}
+
+int verificar_balanceamento(const char* str) {
+    Pilha p;
+    inicializar(&p);
+    for (int i = 0; str[i]; i++) {
+        if (str[i] == '(' || str[i] == '{' || str[i] == '[') {
+            empilhar(&p, str[i]);
+        } else if (str[i] == ')' || str[i] == '}' || str[i] == ']') {
+            if (pilha_vazia(&p) || !corresponde(desempilhar(&p), str[i])) {
+                return 0;
+            }
+        }
     }
-    printf("NULL\n");
+    return pilha_vazia(&p);
 }
 
 int main() {
-    Pilha p;
-    inicializar_pilha(&p);
-
-    int valor;
-
-    desempilhar(&p, &valor);
-
-    empilhar(&p, 5);
-    imprimir_pilha(&p);
-
-    empilhar(&p, 10);
-    empilhar(&p, 15);
-    imprimir_pilha(&p);
-
-    desempilhar(&p, &valor);
-    printf("Desempilhado: %d\n", valor);
-    imprimir_pilha(&p);
-
+    printf("%d\n", verificar_balanceamento("({[]})")); // 1
+    printf("%d\n", verificar_balanceamento("{[()]}")); // 1
+    printf("%d\n", verificar_balanceamento("{[(])}")); // 0
+    printf("%d\n", verificar_balanceamento("{[}"));    // 0
+    printf("%d\n", verificar_balanceamento(""));       // 1
     return 0;
 }
