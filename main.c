@@ -1,72 +1,73 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TAM 100
+typedef struct No {
+    int dado;
+    struct No* prox;
+} No;
 
 typedef struct {
-    int fila[TAM];
-    int inicio;
-    int fim;
-    int tamanho;
-} FilaCircular;
+    No* inicio;
+    No* fim;
+} Fila;
 
-void inicializar(FilaCircular* f) {
-    f->inicio = 0;
-    f->fim = 0;
-    f->tamanho = 0;
+void inicializar(Fila* f) {
+    f->inicio = NULL;
+    f->fim = NULL;
 }
 
-int fila_vazia(FilaCircular* f) {
-    return f->tamanho == 0;
+int fila_vazia(Fila* f) {
+    return f->inicio == NULL;
 }
 
-int fila_cheia(FilaCircular* f) {
-    return f->tamanho == TAM;
-}
-
-int enfileirar(FilaCircular* f, int valor) {
-    if (fila_cheia(f)) return 0;
-    f->fila[f->fim] = valor;
-    f->fim = (f->fim + 1) % TAM;
-    f->tamanho++;
-    return 1;
-}
-
-int desenfileirar(FilaCircular* f, int* valor) {
-    if (fila_vazia(f)) return 0;
-    *valor = f->fila[f->inicio];
-    f->inicio = (f->inicio + 1) % TAM;
-    f->tamanho--;
-    return 1;
-}
-
-int frente(FilaCircular* f, int* valor) {
-    if (fila_vazia(f)) return 0;
-    *valor = f->fila[f->inicio];
-    return 1;
-}
-
-void imprimir_fila(FilaCircular* f) {
+void enfileirar(Fila* f, int valor) {
+    No* novo = malloc(sizeof(No));
+    novo->dado = valor;
+    novo->prox = NULL;
     if (fila_vazia(f)) {
-        printf("Fila vazia\n");
-        return;
+        f->inicio = novo;
+        f->fim = novo;
+    } else {
+        f->fim->prox = novo;
+        f->fim = novo;
     }
-    int i = f->inicio;
-    int count = f->tamanho;
-    while (count--) {
-        printf("%d ", f->fila[i]);
-        i = (i + 1) % TAM;
+}
+
+int desenfileirar(Fila* f, int* valor) {
+    if (fila_vazia(f)) return 0;
+    No* temp = f->inicio;
+    *valor = temp->dado;
+    f->inicio = temp->prox;
+    if (f->inicio == NULL) {
+        f->fim = NULL;
+    }
+    free(temp);
+    return 1;
+}
+
+int frente(Fila* f, int* valor) {
+    if (fila_vazia(f)) return 0;
+    *valor = f->inicio->dado;
+    return 1;
+}
+
+void imprimir_fila(Fila* f) {
+    No* atual = f->inicio;
+    while (atual) {
+        printf("%d ", atual->dado);
+        atual = atual->prox;
     }
     printf("\n");
 }
 
 int main() {
-    FilaCircular f;
+    Fila f;
     inicializar(&f);
 
+    enfileirar(&f, 5);
     enfileirar(&f, 10);
-    enfileirar(&f, 20);
-    enfileirar(&f, 30);
+    enfileirar(&f, 15);
+
     imprimir_fila(&f);
 
     int valor;
