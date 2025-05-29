@@ -6,13 +6,6 @@ typedef struct No {
     struct No* prox;
 } No;
 
-void inserir_inicio(No** l, int v) {
-    No* n = malloc(sizeof(No));
-    n->val = v;
-    n->prox = *l;
-    *l = n;
-}
-
 void inserir_fim(No** l, int v) {
     No* n = malloc(sizeof(No));
     n->val = v;
@@ -25,30 +18,20 @@ void inserir_fim(No** l, int v) {
     }
 }
 
-void inserir_posicao(No** l, int v, int pos) {
-    if (pos == 0) {
-        inserir_inicio(l, v);
-        return;
-    }
-    
+void remover_valor(No** l, int v) {
     No* atual = *l;
-    for (int i = 0; i < pos - 1; i++) {
-        if (atual == NULL) {
-            printf("Posição inválida\n");
+    No* ant = NULL;
+
+    while (atual) {
+        if (atual->val == v) {
+            if (ant == NULL) *l = atual->prox;
+            else ant->prox = atual->prox;
+            free(atual);
             return;
         }
+        ant = atual;
         atual = atual->prox;
     }
-    
-    if (atual == NULL) {
-        printf("Posição inválida\n");
-        return;
-    }
-    
-    No* novo = malloc(sizeof(No));
-    novo->val = v;
-    novo->prox = atual->prox;
-    atual->prox = novo;
 }
 
 void imprimir(No* l) {
@@ -62,16 +45,15 @@ void imprimir(No* l) {
 int main() {
     No* l = NULL;
     inserir_fim(&l, 10);
-    inserir_inicio(&l, 5);
+    inserir_fim(&l, 20);
+    inserir_fim(&l, 30);
     inserir_fim(&l, 20);
 
-    imprimir(l);  
-
-    inserir_posicao(&l, 15, 2);  
-    imprimir(l);  
-
-    inserir_posicao(&l, 1, 0);   
-    imprimir(l);  
+    imprimir(l);
+    remover_valor(&l, 20);
+    imprimir(l);
+    remover_valor(&l, 10);
+    imprimir(l);
 
     return 0;
 }
