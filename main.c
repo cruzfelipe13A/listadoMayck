@@ -25,6 +25,15 @@ void inserir_fim(No** l, int v) {
     }
 }
 
+int contar_nos(No* l) {
+    int cont = 0;
+    while (l) {
+        cont++;
+        l = l->prox;
+    }
+    return cont;
+}
+
 void imprimir(No* l) {
     while (l) {
         printf("%d -> ", l->val);
@@ -37,5 +46,10 @@ int main() {
     No* l = NULL;
     inserir_fim(&l, 10);
     inserir_inicio(&l, 5);
+    inserir_fim(&l, 20);
+
     imprimir(l);
+    printf("Total de nós: %d\n", contar_nos(l));
+
+    return 0;
 }
