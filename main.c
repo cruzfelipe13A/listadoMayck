@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct No {
-    int dado;
+    char* dado;
     struct No* prox;
 } No;
 
@@ -20,9 +21,9 @@ int fila_vazia(Fila* f) {
     return f->inicio == NULL;
 }
 
-void enfileirar(Fila* f, int valor) {
+void enfileirar(Fila* f, const char* valor) {
     No* novo = malloc(sizeof(No));
-    novo->dado = valor;
+    novo->dado = strdup(valor);
     novo->prox = NULL;
     if (fila_vazia(f)) {
         f->inicio = novo;
@@ -33,52 +34,57 @@ void enfileirar(Fila* f, int valor) {
     }
 }
 
-int desenfileirar(Fila* f, int* valor) {
-    if (fila_vazia(f)) return 0;
+char* desenfileirar(Fila* f) {
+    if (fila_vazia(f)) return NULL;
     No* temp = f->inicio;
-    *valor = temp->dado;
+    char* dado = temp->dado;
     f->inicio = temp->prox;
-    if (f->inicio == NULL) {
-        f->fim = NULL;
-    }
+    if (f->inicio == NULL) f->fim = NULL;
     free(temp);
-    return 1;
+    return dado;
 }
 
-int frente(Fila* f, int* valor) {
-    if (fila_vazia(f)) return 0;
-    *valor = f->inicio->dado;
-    return 1;
-}
-
-void imprimir_fila(Fila* f) {
-    No* atual = f->inicio;
-    while (atual) {
-        printf("%d ", atual->dado);
-        atual = atual->prox;
+void liberar_fila(Fila* f) {
+    while (!fila_vazia(f)) {
+        char* val = desenfileirar(f);
+        free(val);
     }
-    printf("\n");
+}
+
+void gerar_binarios(int N) {
+    if (N <= 0) return;
+    Fila fila;
+    inicializar(&fila);
+    enfileirar(&fila, "1");
+
+    for (int i = 0; i < N; i++) {
+        char* atual = desenfileirar(&fila);
+        printf("%s\n", atual);
+
+        // Gerar próxima sequência: atual + "0" e atual + "1"
+        int len = strlen(atual);
+        char* s0 = malloc(len + 2);
+        char* s1 = malloc(len + 2);
+
+        strcpy(s0, atual);
+        s0[len] = '0';
+        s0[len+1] = '\0';
+
+        strcpy(s1, atual);
+        s1[len] = '1';
+        s1[len+1] = '\0';
+
+        enfileirar(&fila, s0);
+        enfileirar(&fila, s1);
+
+        free(atual);
+        // s0 and s1 freed later when dequeued
+    }
+    liberar_fila(&fila);
 }
 
 int main() {
-    Fila f;
-    inicializar(&f);
-
-    enfileirar(&f, 5);
-    enfileirar(&f, 10);
-    enfileirar(&f, 15);
-
-    imprimir_fila(&f);
-
-    int valor;
-    if (desenfileirar(&f, &valor)) {
-        printf("Desenfileirado: %d\n", valor);
-    }
-    imprimir_fila(&f);
-
-    if (frente(&f, &valor)) {
-        printf("Frente da fila: %d\n", valor);
-    }
-
+    int N = 10;
+    gerar_binarios(N);
     return 0;
 }
