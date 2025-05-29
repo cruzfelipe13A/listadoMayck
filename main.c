@@ -1,30 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TAMANHO_PILHA 100
+
 typedef struct No {
     int dado;
     struct No* prox;
 } No;
 
-typedef struct Pilha {
-    int valor;
-    struct Pilha* prox;
-} Pilha;
+typedef struct {
+    int dados[TAMANHO_PILHA];
+    int topo;
+} PilhaArray;
 
-void empilhar(Pilha** topo, int v) {
-    Pilha* novo = malloc(sizeof(Pilha));
-    novo->valor = v;
-    novo->prox = *topo;
-    *topo = novo;
+void inicializar_pilha(PilhaArray* p) {
+    p->topo = -1;
 }
 
-int desempilhar(Pilha** topo) {
-    if (*topo == NULL) return -1;
-    Pilha* temp = *topo;
-    int v = temp->valor;
-    *topo = temp->prox;
-    free(temp);
-    return v;
+int empilhar(PilhaArray* p, int valor) {
+    if (p->topo >= TAMANHO_PILHA - 1) return 0;
+    p->dados[++(p->topo)] = valor;
+    return 1;
+}
+
+int desempilhar(PilhaArray* p, int* valor) {
+    if (p->topo < 0) return 0;
+    *valor = p->dados[(p->topo)--];
+    return 1;
 }
 
 void inserir_fim(No** l, int v) {
@@ -48,33 +50,35 @@ void imprimir(No* l) {
     printf("NULL\n");
 }
 
-void imprimir_reverso_com_pilha(No* l) {
-    Pilha* pilha = NULL;
+void imprimir_reverso_com_array(No* l) {
+    PilhaArray pilha;
+    inicializar_pilha(&pilha);
     while (l) {
         empilhar(&pilha, l->dado);
         l = l->prox;
     }
-    while (pilha) {
-        printf("%d -> ", desempilhar(&pilha));
+    int valor;
+    while (desempilhar(&pilha, &valor)) {
+        printf("%d -> ", valor);
     }
     printf("NULL\n");
 }
 
 int main() {
     No* lista1 = NULL;
-    imprimir_reverso_com_pilha(lista1);
+    imprimir_reverso_com_array(lista1);
 
     No* lista2 = NULL;
-    inserir_fim(&lista2, 42);
-    imprimir_reverso_com_pilha(lista2);
+    inserir_fim(&lista2, 7);
+    imprimir_reverso_com_array(lista2);
 
     No* lista3 = NULL;
-    inserir_fim(&lista3, 1);
-    inserir_fim(&lista3, 2);
-    inserir_fim(&lista3, 3);
-    inserir_fim(&lista3, 4);
+    inserir_fim(&lista3, 10);
+    inserir_fim(&lista3, 20);
+    inserir_fim(&lista3, 30);
+    inserir_fim(&lista3, 40);
     imprimir(lista3);
-    imprimir_reverso_com_pilha(lista3);
+    imprimir_reverso_com_array(lista3);
 
     return 0;
 }
