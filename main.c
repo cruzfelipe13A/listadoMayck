@@ -1,60 +1,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct No {
-    int valor;
-    int minimo;
-    struct No* prox;
-} No;
+#define MAX 100
 
-typedef struct Pilha {
-    No* topo;
-} Pilha;
+typedef struct DuasPilha {
+    int dados[MAX];
+    int topo1;
+    int topo2;
+} DuasPilha;
 
-void inicializar(Pilha* p) {
-    p->topo = NULL;
+void inicializar(DuasPilha* p) {
+    p->topo1 = -1;
+    p->topo2 = MAX;
 }
 
-void push(Pilha* p, int valor) {
-    No* n = malloc(sizeof(No));
-    n->valor = valor;
-    n->minimo = (!p->topo || valor < p->topo->minimo) ? valor : p->topo->minimo;
-    n->prox = p->topo;
-    p->topo = n;
+int push1(DuasPilha* p, int valor) {
+    if (p->topo1 + 1 == p->topo2) return 0;
+    p->dados[++(p->topo1)] = valor;
+    return 1;
 }
 
-int pop(Pilha* p) {
-    if (!p->topo) return -1;
-    No* temp = p->topo;
-    int valor = temp->valor;
-    p->topo = temp->prox;
-    free(temp);
-    return valor;
+int push2(DuasPilha* p, int valor) {
+    if (p->topo2 - 1 == p->topo1) return 0;
+    p->dados[--(p->topo2)] = valor;
+    return 1;
 }
 
-int top(Pilha* p) {
-    if (!p->topo) return -1;
-    return p->topo->valor;
+int pop1(DuasPilha* p) {
+    if (p->topo1 == -1) return -1;
+    return p->dados[(p->topo1)--];
 }
 
-int obter_minimo(Pilha* p) {
-    if (!p->topo) return -1;
-    return p->topo->minimo;
+int pop2(DuasPilha* p) {
+    if (p->topo2 == MAX) return -1;
+    return p->dados[(p->topo2)++];
 }
 
 int main() {
-    Pilha p;
+    DuasPilha p;
     inicializar(&p);
-    push(&p, 3);
-    push(&p, 5);
-    printf("%d\n", obter_minimo(&p));
-    push(&p, 2);
-    push(&p, 1);
-    printf("%d\n", obter_minimo(&p));
-    pop(&p);
-    printf("%d\n", obter_minimo(&p));
-    pop(&p);
-    printf("%d\n", top(&p));
-    printf("%d\n", obter_minimo(&p));
+
+    push1(&p, 1);
+    push1(&p, 2);
+    push2(&p, 100);
+    push2(&p, 200);
+
+    printf("%d\n", pop1(&p));
+    printf("%d\n", pop2(&p));
+    printf("%d\n", pop1(&p));
+    printf("%d\n", pop2(&p));
+    printf("%d\n", pop1(&p));
+
     return 0;
 }
