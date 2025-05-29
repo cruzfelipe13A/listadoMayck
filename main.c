@@ -24,35 +24,34 @@ char desempilhar(Pilha* p) {
     return p->dados[(p->topo)--];
 }
 
-void inverter_string(char* str) {
+int verificar_palindromo(const char* str) {
     Pilha p;
     inicializar(&p);
 
-    for (int i = 0; str[i]; i++) {
+    int len = strlen(str);
+
+    for (int i = 0; i < len; i++) {
         empilhar(&p, str[i]);
     }
 
-    for (int i = 0; str[i]; i++) {
-        str[i] = desempilhar(&p);
+    for (int i = 0; i < len; i++) {
+        if (str[i] != desempilhar(&p)) {
+            return 0;
+        }
     }
+
+    return 1;
 }
 
 int main() {
-    char s1[] = "";
-    inverter_string(s1);
-    printf("%s\n", s1); // (vazio)
-
-    char s2[] = "a";
-    inverter_string(s2);
-    printf("%s\n", s2); // a
-
-    char s3[] = "hello";
-    inverter_string(s3);
-    printf("%s\n", s3); // olleh
-
-    char s4[] = "abcdef";
-    inverter_string(s4);
-    printf("%s\n", s4); // fedcba
-
+    printf("%d\n", verificar_palindromo(""));         // 1
+    printf("%d\n", verificar_palindromo("a"));        // 1
+    printf("%d\n", verificar_palindromo("radar"));    // 1
+    printf("%d\n", verificar_palindromo("level"));    // 1
+    printf("%d\n", verificar_palindromo("hello"));    // 0
+    printf("%d\n", verificar_palindromo("abba"));     // 1
+    printf("%d\n", verificar_palindromo("abcba"));    // 1
+    printf("%d\n", verificar_palindromo("abccba"));   // 1
+    printf("%d\n", verificar_palindromo("abcd"));     // 0
     return 0;
 }
