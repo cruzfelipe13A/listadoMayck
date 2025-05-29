@@ -1,77 +1,66 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 1000
+typedef struct No {
+    int dado;
+    struct No* prox;
+} No;
 
-typedef struct Pilha {
-    int dados[MAX];
-    int topo;
-} Pilha;
+No* inverter_grupos(No* head, int k) {
+    No *atual = head, *prev = NULL, *prox = NULL;
+    int count = 0;
 
-void inicializar(Pilha* p) {
-    p->topo = -1;
-}
-
-int empilhar(Pilha* p, int val) {
-    if (p->topo >= MAX - 1) return 0;
-    p->dados[++(p->topo)] = val;
-    return 1;
-}
-
-int desempilhar(Pilha* p) {
-    if (p->topo < 0) return -1;
-    return p->dados[(p->topo)--];
-}
-
-typedef struct Fila {
-    Pilha s1;
-    Pilha s2;
-} Fila;
-
-void inicializar_fila(Fila* f) {
-    inicializar(&f->s1);
-    inicializar(&f->s2);
-}
-
-void enfileirar(Fila* f, int val) {
-    empilhar(&f->s1, val);
-}
-
-int desenfileirar(Fila* f) {
-    if (f->s2.topo == -1) {
-        while (f->s1.topo != -1) {
-            empilhar(&f->s2, desempilhar(&f->s1));
-        }
+    No* temp = head;
+    int nodes = 0;
+    while (temp) {
+        nodes++;
+        temp = temp->prox;
     }
-    return desempilhar(&f->s2);
+    if (k <= 1 || nodes < k) return head;
+
+    count = 0;
+    while (atual && count < k) {
+        prox = atual->prox;
+        atual->prox = prev;
+        prev = atual;
+        atual = prox;
+        count++;
+    }
+    if (prox) head->prox = inverter_grupos(prox, k);
+    return prev;
 }
 
-int frente(Fila* f) {
-    if (f->s2.topo == -1) {
-        while (f->s1.topo != -1) {
-            empilhar(&f->s2, desempilhar(&f->s1));
-        }
+void imprimir(No* l) {
+    while (l) {
+        printf("%d -> ", l->dado);
+        l = l->prox;
     }
-    if (f->s2.topo == -1) return -1;
-    return f->s2.dados[f->s2.topo];
+    printf("NULL\n");
+}
+
+void inserir_fim(No** l, int v) {
+    No* n = malloc(sizeof(No));
+    n->dado = v;
+    n->prox = NULL;
+    if (*l == NULL) {
+        *l = n;
+    } else {
+        No* a = *l;
+        while (a->prox) a = a->prox;
+        a->prox = n;
+    }
 }
 
 int main() {
-    Fila f;
-    inicializar_fila(&f);
+    No* lista = NULL;
+    inserir_fim(&lista, 1);
+    inserir_fim(&lista, 2);
+    inserir_fim(&lista, 3);
+    inserir_fim(&lista, 4);
+    inserir_fim(&lista, 5);
 
-    enfileirar(&f, 10);
-    enfileirar(&f, 20);
-    enfileirar(&f, 30);
-
-    printf("%d\n", frente(&f));
-    printf("%d\n", desenfileirar(&f));
-    printf("%d\n", desenfileirar(&f));
-
-    enfileirar(&f, 40);
-    printf("%d\n", frente(&f));
-    printf("%d\n", desenfileirar(&f));
-    printf("%d\n", desenfileirar(&f));
+    lista = inverter_grupos(lista, 2);
+    imprimir(lista); 
 
     return 0;
 }
