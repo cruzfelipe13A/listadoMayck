@@ -13,25 +13,22 @@ No* criar_no(int valor) {
     return n;
 }
 
-No* unir_listas_ordenadas(No* l1, No* l2) {
-    No* inicio = NULL;
-    No** atual = &inicio;
-
-    while (l1 && l2) {
-        if (l1->dado <= l2->dado) {
-            *atual = l1;
-            l1 = l1->prox;
-        } else {
-            *atual = l2;
-            l2 = l2->prox;
-        }
-        atual = &((*atual)->prox);
+void remover_todas_ocorrencias(No** inicio, int valor) {
+    while (*inicio && (*inicio)->dado == valor) {
+        No* temp = *inicio;
+        *inicio = (*inicio)->prox;
+        free(temp);
     }
-
-    if (l1) *atual = l1;
-    else *atual = l2;
-
-    return inicio;
+    No* atual = *inicio;
+    while (atual && atual->prox) {
+        if (atual->prox->dado == valor) {
+            No* temp = atual->prox;
+            atual->prox = temp->prox;
+            free(temp);
+        } else {
+            atual = atual->prox;
+        }
+    }
 }
 
 void imprimir_lista(No* l) {
@@ -51,17 +48,17 @@ void liberar_lista(No* l) {
 }
 
 int main() {
-    No* l1 = criar_no(1);
-    l1->prox = criar_no(3);
-    l1->prox->prox = criar_no(5);
+    No* lista = criar_no(1);
+    lista->prox = criar_no(2);
+    lista->prox->prox = criar_no(3);
+    lista->prox->prox->prox = criar_no(2);
+    lista->prox->prox->prox->prox = criar_no(4);
+    lista->prox->prox->prox->prox->prox = criar_no(2);
 
-    No* l2 = criar_no(2);
-    l2->prox = criar_no(4);
-    l2->prox->prox = criar_no(6);
+    imprimir_lista(lista);
+    remover_todas_ocorrencias(&lista, 2);
+    imprimir_lista(lista);
 
-    No* unida = unir_listas_ordenadas(l1, l2);
-    imprimir_lista(unida);
-
-    liberar_lista(unida);
+    liberar_lista(lista);
     return 0;
 }
