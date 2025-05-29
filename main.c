@@ -1,90 +1,99 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-typedef struct No {
-    char* dado;
-    struct No* prox;
-} No;
+#define TAM 100
 
 typedef struct {
-    No* inicio;
-    No* fim;
-} Fila;
+    int fila[TAM];
+    int inicio;
+    int fim;
+    int tamanho;
+} FilaCircular;
 
-void inicializar(Fila* f) {
-    f->inicio = NULL;
-    f->fim = NULL;
+void inicializar(FilaCircular* f) {
+    f->inicio = 0;
+    f->fim = 0;
+    f->tamanho = 0;
 }
 
-int fila_vazia(Fila* f) {
-    return f->inicio == NULL;
+int fila_vazia(FilaCircular* f) {
+    return f->tamanho == 0;
 }
 
-void enfileirar(Fila* f, const char* valor) {
-    No* novo = malloc(sizeof(No));
-    novo->dado = strdup(valor);
-    novo->prox = NULL;
+int fila_cheia(FilaCircular* f) {
+    return f->tamanho == TAM;
+}
+
+int enfileirar(FilaCircular* f, int valor) {
+    if (fila_cheia(f)) return 0;
+    f->fila[f->fim] = valor;
+    f->fim = (f->fim + 1) % TAM;
+    f->tamanho++;
+    return 1;
+}
+
+int desenfileirar(FilaCircular* f, int* valor) {
+    if (fila_vazia(f)) return 0;
+    *valor = f->fila[f->inicio];
+    f->inicio = (f->inicio + 1) % TAM;
+    f->tamanho--;
+    return 1;
+}
+
+void imprimir_fila(FilaCircular* f) {
     if (fila_vazia(f)) {
-        f->inicio = novo;
-        f->fim = novo;
-    } else {
-        f->fim->prox = novo;
-        f->fim = novo;
+        printf("Fila vazia\n");
+        return;
     }
+    int i = f->inicio, count = f->tamanho;
+    while (count--) {
+        printf("%d ", f->fila[i]);
+        i = (i + 1) % TAM;
+    }
+    printf("\n");
 }
 
-char* desenfileirar(Fila* f) {
-    if (fila_vazia(f)) return NULL;
-    No* temp = f->inicio;
-    char* dado = temp->dado;
-    f->inicio = temp->prox;
-    if (f->inicio == NULL) f->fim = NULL;
-    free(temp);
-    return dado;
-}
+void inverter_primeiros_k(FilaCircular* f, int k) {
+    if (k <= 0 || k > f->tamanho) return;
 
-void liberar_fila(Fila* f) {
-    while (!fila_vazia(f)) {
-        char* val = desenfileirar(f);
-        free(val);
+    int pilha[TAM];
+    int topo = -1;
+    int val;
+
+    // Desenfileirar os primeiros k elementos e empilhar
+    for (int i = 0; i < k; i++) {
+        desenfileirar(f, &val);
+        pilha[++topo] = val;
     }
-}
 
-void gerar_binarios(int N) {
-    if (N <= 0) return;
-    Fila fila;
-    inicializar(&fila);
-    enfileirar(&fila, "1");
-
-    for (int i = 0; i < N; i++) {
-        char* atual = desenfileirar(&fila);
-        printf("%s\n", atual);
-
-        // Gerar próxima sequência: atual + "0" e atual + "1"
-        int len = strlen(atual);
-        char* s0 = malloc(len + 2);
-        char* s1 = malloc(len + 2);
-
-        strcpy(s0, atual);
-        s0[len] = '0';
-        s0[len+1] = '\0';
-
-        strcpy(s1, atual);
-        s1[len] = '1';
-        s1[len+1] = '\0';
-
-        enfileirar(&fila, s0);
-        enfileirar(&fila, s1);
-
-        free(atual);
-        // s0 and s1 freed later when dequeued
+    // Enfileirar os elementos da pilha (invertidos)
+    while (topo >= 0) {
+        enfileirar(f, pilha[topo--]);
     }
-    liberar_fila(&fila);
+
+    // Enfileirar os elementos restantes para manter ordem
+    int tamanho_restante = f->tamanho - k;
+    for (int i = 0; i < tamanho_restante; i++) {
+        desenfileirar(f, &val);
+        enfileirar(f, val);
+    }
 }
 
 int main() {
-    int N = 10;
-    gerar_binarios(N);
+    FilaCircular f;
+    inicializar(&f);
+
+    for (int i = 1; i <= 10; i++) {
+        enfileirar(&f, i);
+    }
+
+    printf("Fila original:\n");
+    imprimir_fila(&f);
+
+    inverter_primeiros_k(&f, 5);
+
+    printf("Fila após inverter os primeiros 5 elementos:\n");
+    imprimir_fila(&f);
+
     return 0;
 }
