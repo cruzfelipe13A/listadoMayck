@@ -1,55 +1,66 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
-#define MAX 100
+#define MAX 1000
 
-typedef struct DuasPilha {
+typedef struct Pilha {
     int dados[MAX];
-    int topo1;
-    int topo2;
-} DuasPilha;
+    int topo;
+} Pilha;
 
-void inicializar(DuasPilha* p) {
-    p->topo1 = -1;
-    p->topo2 = MAX;
+void inicializar(Pilha* p) {
+    p->topo = -1;
 }
 
-int push1(DuasPilha* p, int valor) {
-    if (p->topo1 + 1 == p->topo2) return 0;
-    p->dados[++(p->topo1)] = valor;
+int empilhar(Pilha* p, int val) {
+    if (p->topo >= MAX - 1) return 0;
+    p->dados[++(p->topo)] = val;
     return 1;
 }
 
-int push2(DuasPilha* p, int valor) {
-    if (p->topo2 - 1 == p->topo1) return 0;
-    p->dados[--(p->topo2)] = valor;
-    return 1;
+int desempilhar(Pilha* p) {
+    if (p->topo < 0) return -1;
+    return p->dados[(p->topo)--];
 }
 
-int pop1(DuasPilha* p) {
-    if (p->topo1 == -1) return -1;
-    return p->dados[(p->topo1)--];
-}
+int avaliar_posfixa(const char* expr) {
+    Pilha p;
+    inicializar(&p);
 
-int pop2(DuasPilha* p) {
-    if (p->topo2 == MAX) return -1;
-    return p->dados[(p->topo2)++];
+    char buffer[20];
+    int i = 0, j = 0;
+
+    while (1) {
+        if (expr[i] == ' ' || expr[i] == '\0') {
+            if (j > 0) {
+                buffer[j] = '\0';
+                if (isdigit(buffer[0]) || (buffer[0] == '-' && isdigit(buffer[1]))) {
+                    empilhar(&p, atoi(buffer));
+                } else {
+                    int b = desempilhar(&p);
+                    int a = desempilhar(&p);
+                    switch (buffer[0]) {
+                        case '+': empilhar(&p, a + b); break;
+                        case '-': empilhar(&p, a - b); break;
+                        case '*': empilhar(&p, a * b); break;
+                        case '/': empilhar(&p, a / b); break;
+                    }
+                }
+                j = 0;
+            }
+            if (expr[i] == '\0') break;
+        } else {
+            buffer[j++] = expr[i];
+        }
+        i++;
+    }
+    return desempilhar(&p);
 }
 
 int main() {
-    DuasPilha p;
-    inicializar(&p);
-
-    push1(&p, 1);
-    push1(&p, 2);
-    push2(&p, 100);
-    push2(&p, 200);
-
-    printf("%d\n", pop1(&p));
-    printf("%d\n", pop2(&p));
-    printf("%d\n", pop1(&p));
-    printf("%d\n", pop2(&p));
-    printf("%d\n", pop1(&p));
-
+    printf("%d\n", avaliar_posfixa("3 4 + 2 *"));     // 14
+    printf("%d\n", avaliar_posfixa("5 1 2 + 4 * + 3 -")); // 14
     return 0;
 }
