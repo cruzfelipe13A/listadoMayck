@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
 
 #define MAX 1000
 
@@ -25,42 +23,55 @@ int desempilhar(Pilha* p) {
     return p->dados[(p->topo)--];
 }
 
-int avaliar_posfixa(const char* expr) {
-    Pilha p;
-    inicializar(&p);
+typedef struct Fila {
+    Pilha s1;
+    Pilha s2;
+} Fila;
 
-    char buffer[20];
-    int i = 0, j = 0;
+void inicializar_fila(Fila* f) {
+    inicializar(&f->s1);
+    inicializar(&f->s2);
+}
 
-    while (1) {
-        if (expr[i] == ' ' || expr[i] == '\0') {
-            if (j > 0) {
-                buffer[j] = '\0';
-                if (isdigit(buffer[0]) || (buffer[0] == '-' && isdigit(buffer[1]))) {
-                    empilhar(&p, atoi(buffer));
-                } else {
-                    int b = desempilhar(&p);
-                    int a = desempilhar(&p);
-                    switch (buffer[0]) {
-                        case '+': empilhar(&p, a + b); break;
-                        case '-': empilhar(&p, a - b); break;
-                        case '*': empilhar(&p, a * b); break;
-                        case '/': empilhar(&p, a / b); break;
-                    }
-                }
-                j = 0;
-            }
-            if (expr[i] == '\0') break;
-        } else {
-            buffer[j++] = expr[i];
+void enfileirar(Fila* f, int val) {
+    empilhar(&f->s1, val);
+}
+
+int desenfileirar(Fila* f) {
+    if (f->s2.topo == -1) {
+        while (f->s1.topo != -1) {
+            empilhar(&f->s2, desempilhar(&f->s1));
         }
-        i++;
     }
-    return desempilhar(&p);
+    return desempilhar(&f->s2);
+}
+
+int frente(Fila* f) {
+    if (f->s2.topo == -1) {
+        while (f->s1.topo != -1) {
+            empilhar(&f->s2, desempilhar(&f->s1));
+        }
+    }
+    if (f->s2.topo == -1) return -1;
+    return f->s2.dados[f->s2.topo];
 }
 
 int main() {
-    printf("%d\n", avaliar_posfixa("3 4 + 2 *"));     // 14
-    printf("%d\n", avaliar_posfixa("5 1 2 + 4 * + 3 -")); // 14
+    Fila f;
+    inicializar_fila(&f);
+
+    enfileirar(&f, 10);
+    enfileirar(&f, 20);
+    enfileirar(&f, 30);
+
+    printf("%d\n", frente(&f));
+    printf("%d\n", desenfileirar(&f));
+    printf("%d\n", desenfileirar(&f));
+
+    enfileirar(&f, 40);
+    printf("%d\n", frente(&f));
+    printf("%d\n", desenfileirar(&f));
+    printf("%d\n", desenfileirar(&f));
+
     return 0;
 }
