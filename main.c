@@ -6,19 +6,6 @@ typedef struct No {
     struct No* prox;
 } No;
 
-int detectar_ciclo(No* inicio) {
-    No *lento = inicio, *rapido = inicio;
-    while (rapido && rapido->prox) {
-        lento = lento->prox;
-        rapido = rapido->prox->prox;
-        if (lento == rapido) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-// Função auxiliar para criar um nó
 No* criar_no(int valor) {
     No* n = malloc(sizeof(No));
     n->dado = valor;
@@ -26,21 +13,55 @@ No* criar_no(int valor) {
     return n;
 }
 
+No* unir_listas_ordenadas(No* l1, No* l2) {
+    No* inicio = NULL;
+    No** atual = &inicio;
+
+    while (l1 && l2) {
+        if (l1->dado <= l2->dado) {
+            *atual = l1;
+            l1 = l1->prox;
+        } else {
+            *atual = l2;
+            l2 = l2->prox;
+        }
+        atual = &((*atual)->prox);
+    }
+
+    if (l1) *atual = l1;
+    else *atual = l2;
+
+    return inicio;
+}
+
+void imprimir_lista(No* l) {
+    while (l) {
+        printf("%d -> ", l->dado);
+        l = l->prox;
+    }
+    printf("NULL\n");
+}
+
+void liberar_lista(No* l) {
+    while (l) {
+        No* temp = l;
+        l = l->prox;
+        free(temp);
+    }
+}
+
 int main() {
-    No* inicio = criar_no(1);
-    inicio->prox = criar_no(2);
-    inicio->prox->prox = criar_no(3);
-    inicio->prox->prox->prox = criar_no(4);
-    inicio->prox->prox->prox->prox = criar_no(5);
+    No* l1 = criar_no(1);
+    l1->prox = criar_no(3);
+    l1->prox->prox = criar_no(5);
 
-    printf("Detectar ciclo (sem ciclo): %d\n", detectar_ciclo(inicio)); // 0
+    No* l2 = criar_no(2);
+    l2->prox = criar_no(4);
+    l2->prox->prox = criar_no(6);
 
-    // Criar ciclo: apontar o último nó para o segundo nó
-    inicio->prox->prox->prox->prox->prox = inicio->prox;
+    No* unida = unir_listas_ordenadas(l1, l2);
+    imprimir_lista(unida);
 
-    printf("Detectar ciclo (com ciclo): %d\n", detectar_ciclo(inicio)); // 1
-
-    // Atenção: não liberando memória pois há ciclo na lista.
-
+    liberar_lista(unida);
     return 0;
 }
