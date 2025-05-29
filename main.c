@@ -1,79 +1,83 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TAM 1000
+#define TAM 100
 
-typedef struct Pilha {
-    int dados[TAM];
-    int topo;
-} Pilha;
+typedef struct {
+    int fila[TAM];
+    int inicio;
+    int fim;
+    int tamanho;
+} FilaCircular;
 
-void inicializar(Pilha* p) {
-    p->topo = -1;
+void inicializar(FilaCircular* f) {
+    f->inicio = 0;
+    f->fim = 0;
+    f->tamanho = 0;
 }
 
-int pilha_vazia(Pilha* p) {
-    return p->topo == -1;
+int fila_vazia(FilaCircular* f) {
+    return f->tamanho == 0;
 }
 
-int empilhar(Pilha* p, int valor) {
-    if (p->topo >= TAM - 1) return 0;
-    p->dados[++(p->topo)] = valor;
+int fila_cheia(FilaCircular* f) {
+    return f->tamanho == TAM;
+}
+
+int enfileirar(FilaCircular* f, int valor) {
+    if (fila_cheia(f)) return 0;
+    f->fila[f->fim] = valor;
+    f->fim = (f->fim + 1) % TAM;
+    f->tamanho++;
     return 1;
 }
 
-int desempilhar(Pilha* p, int* valor) {
-    if (pilha_vazia(p)) return 0;
-    *valor = p->dados[(p->topo)--];
+int desenfileirar(FilaCircular* f, int* valor) {
+    if (fila_vazia(f)) return 0;
+    *valor = f->fila[f->inicio];
+    f->inicio = (f->inicio + 1) % TAM;
+    f->tamanho--;
     return 1;
 }
 
-void imprimir_pilha(Pilha* p) {
-    for (int i = p->topo; i >= 0; i--) {
-        printf("%d ", p->dados[i]);
+int frente(FilaCircular* f, int* valor) {
+    if (fila_vazia(f)) return 0;
+    *valor = f->fila[f->inicio];
+    return 1;
+}
+
+void imprimir_fila(FilaCircular* f) {
+    if (fila_vazia(f)) {
+        printf("Fila vazia\n");
+        return;
+    }
+    int i = f->inicio;
+    int count = f->tamanho;
+    while (count--) {
+        printf("%d ", f->fila[i]);
+        i = (i + 1) % TAM;
     }
     printf("\n");
 }
 
-void ordenar_pilha(Pilha* p) {
-    Pilha aux;
-    inicializar(&aux);
-
-    int temp;
-    while (!pilha_vazia(p)) {
-        desempilhar(p, &temp);
-        while (!pilha_vazia(&aux) && aux.dados[aux.topo] > temp) {
-            int val;
-            desempilhar(&aux, &val);
-            empilhar(p, val);
-        }
-        empilhar(&aux, temp);
-    }
-
-    // Transferir de volta para p para que p fique ordenada (topo com maior)
-    while (!pilha_vazia(&aux)) {
-        desempilhar(&aux, &temp);
-        empilhar(p, temp);
-    }
-}
-
 int main() {
-    Pilha p;
-    inicializar(&p);
+    FilaCircular f;
+    inicializar(&f);
 
-    empilhar(&p, 3);
-    empilhar(&p, 1);
-    empilhar(&p, 4);
-    empilhar(&p, 2);
-    empilhar(&p, 5);
+    enfileirar(&f, 10);
+    enfileirar(&f, 20);
+    enfileirar(&f, 30);
+    imprimir_fila(&f);
 
-    printf("Pilha antes da ordenacao:\n");
-    imprimir_pilha(&p);
+    int valor;
+    if (desenfileirar(&f, &valor)) {
+        printf("Desenfileirado: %d\n", valor);
+    }
+    imprimir_fila(&f);
 
-    ordenar_pilha(&p);
-
-    printf("Pilha depois da ordenacao:\n");
-    imprimir_pilha(&p);
+    if (frente(&f, &valor)) {
+        printf("Frente da fila: %d\n", valor);
+    }
 
     return 0;
 }
