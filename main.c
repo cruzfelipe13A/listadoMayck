@@ -13,10 +13,6 @@ void inicializar(Pilha* p) {
     p->topo = -1;
 }
 
-int pilha_vazia(Pilha* p) {
-    return p->topo == -1;
-}
-
 int empilhar(Pilha* p, char c) {
     if (p->topo >= TAM - 1) return 0;
     p->dados[++(p->topo)] = c;
@@ -24,39 +20,39 @@ int empilhar(Pilha* p, char c) {
 }
 
 char desempilhar(Pilha* p) {
-    if (pilha_vazia(p)) return '\0';
+    if (p->topo < 0) return '\0';
     return p->dados[(p->topo)--];
 }
 
-char topo(Pilha* p) {
-    if (pilha_vazia(p)) return '\0';
-    return p->dados[p->topo];
-}
-
-int corresponde(char ab, char fe) {
-    return (ab == '(' && fe == ')') || (ab == '{' && fe == '}') || (ab == '[' && fe == ']');
-}
-
-int verificar_balanceamento(const char* str) {
+void inverter_string(char* str) {
     Pilha p;
     inicializar(&p);
+
     for (int i = 0; str[i]; i++) {
-        if (str[i] == '(' || str[i] == '{' || str[i] == '[') {
-            empilhar(&p, str[i]);
-        } else if (str[i] == ')' || str[i] == '}' || str[i] == ']') {
-            if (pilha_vazia(&p) || !corresponde(desempilhar(&p), str[i])) {
-                return 0;
-            }
-        }
+        empilhar(&p, str[i]);
     }
-    return pilha_vazia(&p);
+
+    for (int i = 0; str[i]; i++) {
+        str[i] = desempilhar(&p);
+    }
 }
 
 int main() {
-    printf("%d\n", verificar_balanceamento("({[]})")); // 1
-    printf("%d\n", verificar_balanceamento("{[()]}")); // 1
-    printf("%d\n", verificar_balanceamento("{[(])}")); // 0
-    printf("%d\n", verificar_balanceamento("{[}"));    // 0
-    printf("%d\n", verificar_balanceamento(""));       // 1
+    char s1[] = "";
+    inverter_string(s1);
+    printf("%s\n", s1); // (vazio)
+
+    char s2[] = "a";
+    inverter_string(s2);
+    printf("%s\n", s2); // a
+
+    char s3[] = "hello";
+    inverter_string(s3);
+    printf("%s\n", s3); // olleh
+
+    char s4[] = "abcdef";
+    inverter_string(s4);
+    printf("%s\n", s4); // fedcba
+
     return 0;
 }
